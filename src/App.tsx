@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import * as React from 'react';
 import DataStreamer, { ServerRespond } from './DataStreamer';
 import Graph from './Graph';
 import './App.css';
@@ -14,7 +14,9 @@ interface IState {
  * The parent element of the react app.
  * It renders title, button and Graph react element.
  */
-class App extends Component<{}, IState> {
+ class App extends React.Component<{}, IState> {
+  private intervalId?: number;
+
   constructor(props: {}) {
     super(props);
 
@@ -29,7 +31,7 @@ class App extends Component<{}, IState> {
    * Render Graph react component with state.data parse as property data
    */
   renderGraph() {
-    return (<Graph data={this.state.data}/>)
+    return (<Graph data={this.state.data} />)
   }
 
   /**
@@ -44,6 +46,24 @@ class App extends Component<{}, IState> {
   }
 
   /**
+   * Start interval to continuously get data from server
+   */
+  startInterval() {
+    this.intervalId = window.setInterval(() => {
+      this.getDataFromServer();
+    }, 100);
+  }
+
+  /**
+   * Stop interval to stop getting data from server
+   */
+  stopInterval() {
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+    }
+  }
+
+  /**
    * Render the App react component
    */
   render() {
@@ -54,13 +74,12 @@ class App extends Component<{}, IState> {
         </header>
         <div className="App-content">
           <button className="btn btn-primary Stream-button"
-            // when button is click, our react app tries to request
-            // new data from the server.
-            // As part of your task, update the getDataFromServer() function
-            // to keep requesting the data every 100ms until the app is closed
-            // or the server does not return anymore data.
-            onClick={() => {this.getDataFromServer()}}>
+            onClick={() => { this.startInterval() }}>
             Start Streaming Data
+          </button>
+          <button className="btn btn-danger Stream-button"
+            onClick={() => { this.stopInterval() }}>
+            Stop Streaming Data
           </button>
           <div className="Graph">
             {this.renderGraph()}
